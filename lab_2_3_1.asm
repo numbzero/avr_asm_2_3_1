@@ -1,8 +1,8 @@
 .include "m32def.inc"
 
-; Utilizînd Timer/Counter0, generati impulsuri la iesirea OC0
-; cu perioada 50 µS si durata 25% cît la întrarea INT1 = "0",
-; si durata impulsurilor 75% - cît INT1 = "1"
+; UtilizÃ®nd Timer/Counter0, generati impulsuri la iesirea OC0
+; cu perioada 50 ÂµS si durata 25% cÃ®t la Ã®ntrarea INT1 = "0",
+; si durata impulsurilor 75% - cÃ®t INT1 = "1"
 ; -----------------------------------------------------------
 ; OC0 		- PWM
 ; INT1 (0)	- 25%
@@ -24,7 +24,7 @@
 .def T_OFF 	= R21
 .def STATE	= R22
 
-.cseg				; code segment
+.cseg			; code segment
 .org 0x0000	
 	rjmp RESET
 
@@ -43,13 +43,13 @@ EXT_INT_1:
 	rjmp CHANGE_I	; if PD3 is 0 jump to --------        |
 	ldi T_ON, 0x4a	; <---------------------------|------/
 	ldi T_OFF, 0x18	;                             |   
-	rjmp END		; -----\                      |
-CHANGE_I:			; <--------------------------/
+	rjmp END	; -----\                      |
+CHANGE_I:		; <--------------------------/
 	ldi T_ON, 0x18	;       |
 	ldi T_OFF, 0x4a	;       |
-END:				; <----/
+END:			; <----/
 	out SREG, R17 	; restore state of SREG
-	reti			; return from interrupt
+	reti		; return from interrupt
 
 
 
@@ -59,15 +59,15 @@ TC0_CTC:
 	
 	cpi STATE, 0x01 ; compare state with 1
 	breq CHANGE_T 	; branch if equal to 1 ----
-	out OCR0, T_OFF	;						   |
-	rjmp END_T		;---					   |
-CHANGE_T: 			;   |  	   <--------------/
+	out OCR0, T_OFF	;			   |
+	rjmp END_T	;---			   |
+CHANGE_T: 		;   |  	   <--------------/
 	out OCR0, T_ON	;   |
-END_T:				;<-/
+END_T:			;<-/
 	com STATE		
 
 	out SREG, R17	; restore state of sreg
-	reti			; return from interrupt
+	reti		; return from interrupt
 
 
 
@@ -96,10 +96,10 @@ RESET:
 	; timer/counter 0 setup
 	; ctc mode
 	; prescaler - 8
-	; OC0		- toggle on compare match
+	; OC0 - toggle on compare match
 	;------------------------------------
 	;
-	;		 |-----------CTC-----------|   |Toogle OC0 on comp. match|   |-------------clk_i/o / 8-------------|
+	;        |-----------CTC-----------|   |Toogle OC0 on comp. match|   |-------------clk_i/o / 8-------------|
 	ldi R16, (1 << WGM01) | (0 << WGM00) | (0 << COM01) | (1 << COM00) | (0 << CS02) | (1 << CS01) | (0 << CS00)
 	out TCCR0, R16
 	ldi R16, (1 << OCIE0)
@@ -108,14 +108,13 @@ RESET:
 	clr R16
 	out TCNT0, R16	; TCNT0 = 0x00 
 	
-	; T = 100 Timer Cycles
 	ldi T_ON, 0x18	; T_ON 	= 0x18
 	ldi T_OFF, 0x4a	; T_OFF = 0x4a
 	out OCR0, T_ON	; OCR0 	= 0x0c	
 
 	ldi STATE, 0x01	; STATE = 0x01
 	
-	sei				; enable interrupts
+	sei		; enable interrupts
 
 MAIN:
 	rjmp MAIN
