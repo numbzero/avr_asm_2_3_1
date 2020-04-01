@@ -1,24 +1,23 @@
 .include "m32def.inc"
 
-; UtilizÃ®nd Timer/Counter0, generati impulsuri la iesirea OC0
-; cu perioada 50 ÂµS si durata 25% cÃ®t la Ã®ntrarea INT1 = "0",
-; si durata impulsurilor 75% - cÃ®t INT1 = "1"
+; Utilizînd Timer/Counter0, generati impulsuri la iesirea OC0
+; cu perioada 50 µS si durata 25% cît la întrarea INT1 = "0",
+; si durata impulsurilor 75% - cît INT1 = "1"
 ; -----------------------------------------------------------
 ; OC0 		- PWM
 ; INT1 (0)	- 25%
 ; INT1 (1) 	- 75%
-; F_CPU 	- 16MHz
+; F_CPU 	- 4MHz
 ; F_PWM		- 20KHz
 ;-------------------
 ; Machine Cycles (MC) = F_CPU / F_PWM
-; MC = 800
+; MC = 200
 ; Timer/Counter0 - MAX = 255
-; Prescaler - 8
-; Timer Cycles*	= MC / Prescaler = 100
-; OCR0,T_ON  	= 24 (25%)
-; OCR0,T_OFF 	= 74 (25%)
-; OCR0,T_ON  	= 74 (75%)
-; OCR0,T_OFF 	= 24 (75%)
+; Timer Cycles*	= 200
+; OCR0,T_ON  	= 49 (25%)
+; OCR0,T_OFF 	= 149 (25%)
+; OCR0,T_ON  	= 149 (75%)
+; OCR0,T_OFF 	= 49 (75%)
 
 .def T_ON 	= R20
 .def T_OFF 	= R21
@@ -41,12 +40,12 @@ EXT_INT_1:
 	in R17, SREG	; store state of SREG
 	sbis PIND, 3	; skip next instruction if PD3 is 1 --
 	rjmp CHANGE_I	; if PD3 is 0 jump to --------        |
-	ldi T_ON, 0x4a	; <---------------------------|------/
-	ldi T_OFF, 0x18	;                             |   
+	ldi T_ON, 0x95	; <---------------------------|------/
+	ldi T_OFF, 0x31	;                             |   
 	rjmp END	; -----\                      |
 CHANGE_I:		; <--------------------------/
-	ldi T_ON, 0x18	;       |
-	ldi T_OFF, 0x4a	;       |
+	ldi T_ON, 0x31	;       |
+	ldi T_OFF, 0x95	;       |
 END:			; <----/
 	out SREG, R17 	; restore state of SREG
 	reti		; return from interrupt
@@ -95,12 +94,11 @@ RESET:
 
 	; timer/counter 0 setup
 	; ctc mode
-	; prescaler - 8
 	; OC0 - toggle on compare match
 	;------------------------------------
 	;
-	;        |-----------CTC-----------|   |Toogle OC0 on comp. match|   |-------------clk_i/o / 8-------------|
-	ldi R16, (1 << WGM01) | (0 << WGM00) | (0 << COM01) | (1 << COM00) | (0 << CS02) | (1 << CS01) | (0 << CS00)
+	;        |-----------CTC-----------|   |Toogle OC0 on comp. match|   |-------------clk_i/o / 1-------------|
+	ldi R16, (1 << WGM01) | (0 << WGM00) | (0 << COM01) | (1 << COM00) | (0 << CS02) | (0 << CS01) | (1 << CS00)
 	out TCCR0, R16
 	ldi R16, (1 << OCIE0)
 	out TIMSK, R16		; enable timer/counter0 compare mathc  interrupt
@@ -108,9 +106,9 @@ RESET:
 	clr R16
 	out TCNT0, R16	; TCNT0 = 0x00 
 	
-	ldi T_ON, 0x18	; T_ON 	= 0x18
-	ldi T_OFF, 0x4a	; T_OFF = 0x4a
-	out OCR0, T_ON	; OCR0 	= 0x0c	
+	ldi T_ON, 0x31	; T_ON 	= 49
+	ldi T_OFF, 0x95	; T_OFF = 149
+	out OCR0, T_ON	; OCR0 	= 49	
 
 	ldi STATE, 0x01	; STATE = 0x01
 	
